@@ -1,5 +1,33 @@
 #!/bin/bash
 
+# =============================================================================
+# Script Name: InitiateDNS&Sniff.sh
+# Description: This script sets up a DNS server using BIND and captures DNS
+#              queries using tshark, with options to start and stop the services.
+# Author:      Jon David
+# Date:        YYYY-MM-DD
+# Version:     1.0
+# =============================================================================
+# Parameters:
+#   -Interface, --interface    : Network interface to listen on (default: eth0)
+#   -PCap_Output, --pcap-output: Destination of the pcap file (default: /var/log/dns_queries.pcap)
+#   -Action, --action          : Action to perform (start or stop)
+#
+# Usage:
+#   sudo ./InitiateDNS&Sniff.sh -Interface eth0 -PCap_Output /path/to/output.pcap -Action start
+#   sudo ./InitiateDNS&Sniff.sh -Action stop
+#
+# Requirements:
+#   - BIND (named)
+#   - tshark
+#
+# Notes:
+#   - Ensure you have the necessary permissions to install packages and start/stop services.
+# =============================================================================
+
+
+#!/bin/bash
+
 # Function to check if a command exists
 command_exists() {
     command -v "$1" &> /dev/null
