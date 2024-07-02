@@ -9,14 +9,14 @@
 # Version:     1.0
 # =============================================================================
 # Parameters:
-#   -Interface, --interface    : Network interface to listen on (mandatory)
+#   -Interface, --interface    : Network interface to listen on (mandatory for start action)
 #   -PCap_Output, --pcap-output: Destination of the pcap file (default: ./dns_queries.pcap)
 #   -Action, --action          : Action to perform (start or stop) (mandatory)
 #   -h, --help                 : Display this help message
 #
 # Usage:
 #   sudo ./InitiateDNS&Sniff.sh -Interface eth0 -PCap_Output /path/to/output.pcap -Action start
-#   sudo ./InitiateDNS&Sniff.sh -Interface eth0 -Action stop
+#   sudo ./InitiateDNS&Sniff.sh -Action stop
 #
 # Requirements:
 #   - BIND (named)
@@ -32,14 +32,14 @@ display_help() {
 Usage: sudo ./InitiateDNS&Sniff.sh [OPTIONS]
 
 Options:
-  -Interface, --interface      Network interface to listen on (mandatory)
+  -Interface, --interface      Network interface to listen on (mandatory for start action)
   -PCap_Output, --pcap-output  Destination of the pcap file (default: ./dns_queries.pcap)
   -Action, --action            Action to perform (start or stop) (mandatory)
   -h, --help                   Display this help message
 
 Examples:
   sudo ./InitiateDNS&Sniff.sh -Interface eth0 -PCap_Output /path/to/output.pcap -Action start
-  sudo ./InitiateDNS&Sniff.sh -Interface eth0 -Action stop
+  sudo ./InitiateDNS&Sniff.sh -Action stop
 EOF
 }
 
@@ -196,9 +196,16 @@ while [[ "$#" -gt 0 ]]; do
     shift
 done
 
+# Validate mandatory parameters for start action
+if [ "$ACTION" == "start" ] && [ -z "$INTERFACE" ]; then
+    echo "Error: -Interface is a mandatory parameter for the start action."
+    display_help
+    exit 1
+fi
+
 # Validate mandatory parameters
-if [ -z "$INTERFACE" ] || [ -z "$ACTION" ]; then
-    echo "Error: -Interface and -Action are mandatory parameters."
+if [ -z "$ACTION" ]; then
+    echo "Error: -Action is a mandatory parameter."
     display_help
     exit 1
 fi
