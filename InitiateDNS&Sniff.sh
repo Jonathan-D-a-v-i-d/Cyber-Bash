@@ -5,17 +5,18 @@
 # Description: This script sets up a DNS server using BIND and captures DNS
 #              queries using tshark, with options to start and stop the services.
 # Author:      Jon David
-# Date:        YYYY-MM-DD
+# Date:        2024-07-03
 # Version:     1.0
 # =============================================================================
 # Parameters:
-#   -Interface, --interface    : Network interface to listen on (default: eth0)
-#   -PCap_Output, --pcap-output: Destination of the pcap file (default: /var/log/dns_queries.pcap)
-#   -Action, --action          : Action to perform (start or stop)
+#   -Interface, --interface    : Network interface to listen on (mandatory)
+#   -PCap_Output, --pcap-output: Destination of the pcap file (default: ./dns_queries.pcap)
+#   -Action, --action          : Action to perform (start or stop) (mandatory)
+#   -h, --help                 : Display this help message
 #
 # Usage:
 #   sudo ./InitiateDNS&Sniff.sh -Interface eth0 -PCap_Output /path/to/output.pcap -Action start
-#   sudo ./InitiateDNS&Sniff.sh -Action stop
+#   sudo ./InitiateDNS&Sniff.sh -Interface eth0 -Action stop
 #
 # Requirements:
 #   - BIND (named)
@@ -25,8 +26,22 @@
 #   - Ensure you have the necessary permissions to install packages and start/stop services.
 # =============================================================================
 
+# Function to display help message
+display_help() {
+    cat << EOF
+Usage: sudo ./InitiateDNS&Sniff.sh [OPTIONS]
 
-#!/bin/bash
+Options:
+  -Interface, --interface      Network interface to listen on (mandatory)
+  -PCap_Output, --pcap-output  Destination of the pcap file (default: ./dns_queries.pcap)
+  -Action, --action            Action to perform (start or stop) (mandatory)
+  -h, --help                   Display this help message
+
+Examples:
+  sudo ./InitiateDNS&Sniff.sh -Interface eth0 -PCap_Output /path/to/output.pcap -Action start
+  sudo ./InitiateDNS&Sniff.sh -Interface eth0 -Action stop
+EOF
+}
 
 # Function to check if a command exists
 command_exists() {
@@ -151,19 +166,32 @@ stop_dns_and_sniff() {
 }
 
 # Parse input parameters
-INTERFACE="eth0"
-OUTPUT_FILE="/var/log/dns_queries.pcap"
-ACTION="start"
+INTERFACE=""
+OUTPUT_FILE="./dns_queries.pcap"
+ACTION=""
+
+if [[ $# -eq 0 ]]; then
+    display_help
+    exit 1
+fi
 
 while [[ "$#" -gt 0 ]]; do
     case $1 in
         -Interface|--interface) INTERFACE="$2"; shift ;;
         -PCap_Output|--pcap-output) OUTPUT_FILE="$2"; shift ;;
         -Action|--action) ACTION="$2"; shift ;;
-        *) echo "Unknown parameter passed: $1"; exit 1 ;;
+        -h|--help) display_help; exit 0 ;;
+        *) echo "Unknown parameter passed: $1"; display_help; exit 1 ;;
     esac
     shift
 done
+
+# Validate mandatory parameters
+if [ -z "$INTERFACE" ] || [ -z "$ACTION" ]; then
+    echo "Error: -Interface and -Action are mandatory parameters."
+    display_help
+    exit 1
+fi
 
 # Execute the appropriate action based on input parameters
 if [ "$ACTION" == "start" ]; then
@@ -174,4 +202,6 @@ elif [ "$ACTION" == "stop" ]; then
     echo "DNS server and DNS query sniffing stopped."
 else
     echo "Unknown action: $ACTION. Use 'start' or 'stop'."
+    display_help
+    exit 1
 fi
