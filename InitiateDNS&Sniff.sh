@@ -5,7 +5,7 @@
 # Description: This script sets up a DNS server using BIND and captures DNS
 #              queries using tshark, with options to start and stop the services.
 # Author:      Jon David
-# Date:        2024-07-03
+# Date:        YYYY-MM-DD
 # Version:     1.0
 # =============================================================================
 # Parameters:
@@ -94,13 +94,30 @@ EOF'
 
 # Function to start BIND service
 start_bind_service() {
-    if ! sudo systemctl is-active --quiet bind9; then
-        echo "Starting BIND service..."
-        sudo systemctl start bind9
-        sudo systemctl enable bind9
-        echo "BIND service started and enabled to run on boot."
+    if systemctl list-unit-files | grep -q '^named.service'; then
+        if ! sudo systemctl is-active --quiet named; then
+            echo "Starting BIND service (named.service)..."
+            sudo systemctl start named
+            sudo systemctl enable named
+            echo "BIND service started and enabled to run on boot."
+        else
+            echo "BIND service (named.service) is already running."
+        fi
     else
-        echo "BIND service is already running."
+        echo "BIND service not found. Please check if BIND (named) is installed correctly."
+        exit 1
+    fi
+}
+
+# Function to stop BIND service
+stop_bind_service() {
+    if systemctl list-unit-files | grep -q '^named.service'; then
+        echo "Stopping BIND service (named.service)..."
+        sudo systemctl stop named
+        echo "BIND service stopped."
+    else
+        echo "BIND service not found. Please check if BIND (named) is installed correctly."
+        exit 1
     fi
 }
 
@@ -138,13 +155,6 @@ stop_tshark() {
     else
         echo "tshark PID file not found. Is tshark running?"
     fi
-}
-
-# Function to stop BIND service
-stop_bind_service() {
-    echo "Stopping BIND service..."
-    sudo systemctl stop bind9
-    echo "BIND service stopped."
 }
 
 # Main function to initiate DNS server and sniff DNS queries
