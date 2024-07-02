@@ -5,12 +5,12 @@
 # Description: This script sets up a DNS server using BIND and captures DNS
 #              queries using tshark, with options to start and stop the services.
 # Author:      Jon David
-# Date:        YYYY-MM-DD
+# Date:        2024-07-02
 # Version:     1.0
 # =============================================================================
 # Parameters:
 #   -Interface, --interface    : Network interface to listen on (mandatory for start action)
-#   -PCap_Output, --pcap-output: Destination of the pcap file (default: ./dns_queries.pcap)
+#   -PCap_Output, --pcap-output: Destination of the pcap file (default: /var/log/dns_queries.pcap)
 #   -Action, --action          : Action to perform (start or stop) (mandatory)
 #   -h, --help                 : Display this help message
 #
@@ -33,7 +33,7 @@ Usage: sudo ./InitiateDNS&Sniff.sh [OPTIONS]
 
 Options:
   -Interface, --interface      Network interface to listen on (mandatory for start action)
-  -PCap_Output, --pcap-output  Destination of the pcap file (default: ./dns_queries.pcap)
+  -PCap_Output, --pcap-output  Destination of the pcap file (default: /var/log/dns_queries.pcap)
   -Action, --action            Action to perform (start or stop) (mandatory)
   -h, --help                   Display this help message
 
@@ -137,6 +137,10 @@ start_tshark() {
     local interface=$1
     local output_file=$2
 
+    # Change to the directory where the script is located
+    script_dir=$(dirname "$0")
+    cd "$script_dir"
+
     echo "Starting tshark to capture DNS traffic on interface $interface..."
     sudo tshark -i "$interface" -f "port 53" -w "$output_file" &
     TSHARK_PID=$!
@@ -177,7 +181,7 @@ stop_dns_and_sniff() {
 
 # Parse input parameters
 INTERFACE=""
-OUTPUT_FILE="./dns_queries.pcap"
+OUTPUT_FILE="/var/log/dns_queries.pcap"
 ACTION=""
 
 if [[ $# -eq 0 ]]; then
