@@ -7,9 +7,8 @@
 #                  options to start or stop the service.
 # Args           : -Start (to install, start and enable Tomcat)
 #                  -Stop (to stop the Tomcat service)
-# Author         : [Your Name]
-# Email          : [Your Email]
-# Date           : [Today's Date]
+# Author         : Jon David
+# Date           : [7/7/2024]
 # Examples       :
 #                  1. To install Apache Struts 2, start and enable Tomcat:
 #                     ./Install&Enable_ApacheStruts2.sh -Start
